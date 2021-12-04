@@ -1,0 +1,189 @@
+\documentclass[a4paper]{article}
+
+\usepackage{sectsty}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{subcaption}
+\usepackage{framed}
+\usepackage[]{enumitem}
+\sectionfont{\fontsize{12}{15}\selectfont}
+\usepackage[left=90.00pt, right=90.00pt, top=100.00pt, bottom=100.00pt]{geometry}
+\title{Homework Assigment 4: Modelling pandemics \\ \large Scientific Software / Technisch Wetenschappelijke Software 2020}
+\author{If I do not change this, the person grading my report will not know who I am!\\ It could be a good idea to change this before writing my report.}
+
+\lstset{
+	language=c++,
+	%    basicstyle={\ttfamily \small},
+	basicstyle={\ttfamily \small},
+	%    keywordstyle=\underline,
+	numberstyle={\footnotesize},
+	%    morekeywords={ones,mod,isprime,inline,unique,factor,@},
+	%    flexiblecolumns=false,
+	%    emph={gamma,beta},
+	%    emphstyle=,
+	columns=fullflexible,
+	%    columns=flexible,
+	%    commentstyle={\slshape},
+	%    commentstyle={\normalfont},
+	commentstyle={\ttfamily},
+	stringstyle={\ttfamily \bfseries},
+	showstringspaces=false,
+	%    indent=1em,
+	%    xleftmargin=0.5em,
+	breaklines=false,
+	%    frame={l},
+	captionpos={t},
+	upquote=true, % such that we can copy-paste the code...
+	%    mathescape=true,
+	%    frame=single,     % boxed in a single line
+	%    frame=L,          % double line on the left
+	%    frame=l,          % single line on the left
+}
+\newcommand{\answer}[1]{\vspace{-0.75em}\begin{framed} #1 \end{framed}\vspace{-0.75em}}
+\begin{document}
+
+\maketitle
+\noindent \textbf{Number of hours spent:} REPLACE WITH THE CORRECT VALUE
+\section*{Practical information (Remove this section before submitting your re-
+port)}
+\textbf{Do not change the margins of this document!}\\
+
+
+Here we show how to include C++-code and a figure:
+\begin{lstlisting}
+#include <iostream>
+#include "vector.hpp"
+
+int main(int argc, char const *argv[])
+{
+	tws::vector<double> x(3,1.);
+	std::cout<<x<<std::endl;
+	return 0;
+}   
+\end{lstlisting}
+
+\begin{figure}[!h]
+	\centering
+	%\includegraphics[width=\textwidth]{}
+	\caption{A description of my figure}
+\end{figure}
+\section*{General}
+\begin{enumerate}[label={(G.\arabic*)}]
+	\item Which important concepts, \verb|C++|-specific syntax, or tools from the lectures and exercise
+sessions did you use? Where? Mentioning four concepts suffices. For each concept, limit
+your discussion to 3 lines. You can forward reference to your answers for the following
+questions.
+	\answer{}
+	\item \textbf{Optional:} Are there changes or improvements you wanted to make but where unable to
+implement due to lack of time? If yes, briefly describe these.
+	\answer{}
+	\item \textbf{Optional:} Are there other general comments you want to make?
+	\answer{}
+\end{enumerate}
+\section*{Part I: Simulating the pandemic}
+\begin{enumerate}[label={(I.\arabic*)}]
+	\item \textbf{Optional:} Have you made any modification to your IVP solvers based on the feedback of the second homework?
+	\answer{}
+	\item Your IVP solvers must now accept more general ordinary differential equations. Which
+C++ features did you need to use to achieve this extra flexibility? What are the advantages
+of this approach? (max. 3 lines)
+\answer{}
+\item For \verb|simulation2.cpp| it is asked how can you pass the differential
+equation to your IVP solver? Discuss all possibilities. (max. 10 lines)
+	\answer{}
+\item How would you write an IVP solver in Fortran that accepts more general differential
+equations? (max. 1 line)
+\answer{Name of the sought for implementation pattern.}
+	\item Compare your Fortran code and your \verb|C++| code.
+	\begin{enumerate}
+	\item What \verb|C++| specific features did you use? (Keep it short! A list of features suffices.
+max. 2 lines)
+	\answer{\hspace{-1cm} Feature 1, Feature 2, ..}
+	\item Are there features that you used in Fortran but that are not available in \verb|C++|? (Keep
+it short! A list of features suffices. max. 2 lines)
+	\answer{}
+	\item Are there design decisions that you have to take into account when working with \verb|C++|
+that you do not have to make (or can not make) in Fortran? (max. 6 lines)
+\answer{}
+	\item \textbf{Optional:} Was it easier to implement the functionality in Fortran or in \verb|C++|?
+	\answer{}
+	\end{enumerate}
+
+	\item In \verb|simulation2.cpp|, how did you avoid using an explicit for or while loop when evaluating the right-hand side of the differential equation? (max. 2 lines)
+	\answer{\texttt{function from the stl}: some more information on how this function works}
+	\item In \verb|simulation2.cpp|, how did you avoid using an explicit for or while loop when filling
+the vector with the initial values? (max. 2 lines)
+	\answer{\texttt{function from the stl}: some more information on how this function works}
+	\item \textbf{Optional}: Are there other design decisions you want to mention?
+	\answer{}
+\end{enumerate}
+\subsection*{Verify your code for the SIQRD model}
+Do not forget to also include your figures separately in your ZIP!!!! (remove this line in your
+submission)
+\begin{figure}[!h]
+	\centering
+	\begin{subfigure}{0.32\linewidth}
+		\centering
+		%\includegraphics[width=\textwidth]{}
+	\end{subfigure}
+	\begin{subfigure}{0.32\linewidth}
+		\centering
+		%\includegraphics[width=\textwidth]{}
+	\end{subfigure}
+	\begin{subfigure}{0.32\linewidth}
+		\centering
+		%\includegraphics[width=\textwidth]{}
+	\end{subfigure}
+\end{figure}
+\subsection*{Verify your code for the general ODE}
+\answer{How did you verify your code for the general ODE?}
+\section*{Part II: Parameter estimation from observations}
+\begin{enumerate}[label={(II.\arabic*)}]
+	\item \textbf{How did you optimize the performance (execution time and memory usage) of
+the parameter estimator code?}
+\begin{enumerate}
+\item What part of the code has the most influence on the execution time (and therefore
+needs to be implemented as efficient as possible)? (max. 1 line)
+\answer{}
+\item How did you avoid unnecessary memory usage or copies? (max. 4 lines)
+\answer{}
+\item What tools did you use to assess the performance of your code? (max. 4 lines)
+\answer{}
+\item Are there other things you have done to improve performance?
+\answer{}
+\end{enumerate}
+	\item \textbf{Flexibility.} How can you switch between the solvers for the initial value problem? (max. 3 lines)
+	\answer{}
+	\item \textbf{Verification.} How did you verify the different parts of your implementation while coding? What tools did you use to debug your code? (max. 6 lines)
+	\answer{}
+	\item What value did you use for $\epsilon$ in the finite difference approximation? Why?
+	\answer{}
+	\item Which modifications would you need to make to your code to add another optimization algorithm? (max. 5 lines)
+	\answer{}
+	\item \textbf{Optional:} Mention the difficulties you encountered while implementing this part. (max.
+10 lines)
+	\answer{}
+\end{enumerate}
+\subsection*{Verify your code}
+Do not forget to also include your figures separately in your ZIP!!!! (remove this line in your
+submission)
+\begin{figure}[!h]
+	\centering
+	\begin{subfigure}{0.49\linewidth}
+		\centering
+		%\includegraphics[width=\textwidth]{}
+	\end{subfigure}
+	\begin{subfigure}{0.49\linewidth}
+		\centering
+		%\includegraphics[width=\textwidth]{}
+	\end{subfigure}
+\end{figure}
+\section*{Extra questions}
+\begin{enumerate}
+	\item What C++-features did you use to achieve this?
+	\answer{}
+	\item Did you make other improvements? How big is their effect on the execution time, the number of calls to the IVP solver or the memory usage?
+	\answer{}
+\end{enumerate}
+
+\end{document}
