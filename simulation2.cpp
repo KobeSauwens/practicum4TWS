@@ -117,13 +117,13 @@ int main(int argc, char **argv)
     //beta
     SIQRD_params(0) = 0.5;
     //mu
-    SIQRD_params(1) = 0;
+    SIQRD_params(1) = 0.;
     //gamma
     SIQRD_params(2) = 0.2;
     //alpha
     SIQRD_params(3) = 0.005;
     //delta
-    SIQRD_params(4) = 0.2;
+    SIQRD_params(4) = 0.;
     //S_0
     SIQRD_params(5) = 100;
     //I_0
@@ -154,14 +154,15 @@ int main(int argc, char **argv)
             break;
 
         case HEUN:  
-            file_name = "heun_lockdown.txt";//"heun_output.txt";
+            file_name = "bwe_quarantine.txt";//"heun_output.txt";
             heun_solve(SIQRD_values, SIQRD_params, siqrd_fun);
             break;
 
         case EULERB: 
-            file_name = "bwe_quarantine.txt";//"euler_b_output.txt";
+            file_name = "heun_lockdown.txt";//"euler_b_output.txt";
             euler_b_solve(SIQRD_values, SIQRD_params, siqrd_fun);
             break;
-    } 
+    }
+    
     print_output(SIQRD_values, file_name);
 }

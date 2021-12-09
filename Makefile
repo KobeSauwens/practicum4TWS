@@ -1,5 +1,5 @@
-sim1: #Change these to the original
-	g++ -o sim1 -O3 -std=c++14 simulation1.cpp
+sim1: *
+	g++ -o sim1 -Og -g -Wall -std=c++17 simulation1.cpp
 sim2:
 	# Put your compile command for simulation2.cpp here. The name of your executable should be simulation2
 est1:
