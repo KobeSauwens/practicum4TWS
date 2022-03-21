@@ -12,157 +12,88 @@
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/assignment.hpp>
-#include "euler_f.hpp"
-#include "euler_b.hpp"
-#include "newton.hpp"
-#include "heun.hpp"
+#include "ODE_solvers.hpp"
 
 
 namespace ublas = boost::numeric::ublas;
 typedef double value_type;
 
-template<typename element_type>
-void print_output(ublas::matrix<element_type> const & SIQRD_values, std::string file_name)
-{
-    std::ofstream outputFile(file_name); 
-    for(unsigned int i = 0; i < SIQRD_values.size1(); ++i)
-    { 
-        for(unsigned int j = 0; j < SIQRD_values.size2(); ++j)
-        {
-            outputFile << SIQRD_values(i,j) << " ";
-        }
-        outputFile << std::endl;
-    }
-}
-
-template<typename param_type, typename elem_type>
-struct SIQRD_fun 
+struct Weird_ODE2 
 {
 public:
-SIQRD_fun( ublas::vector<value_type> parameters )
-:beta_( parameters(0) )
-,mu_( parameters(1) )
-,gamma_( parameters(2) )
-,alpha_( parameters(3) )
-,delta_( parameters(4) ) 
+Weird_ODE2()
 {}
 
-ublas::vector<elem_type> operator()(ublas::vector<elem_type> const& v) const 
+ublas::vector<value_type> operator()(ublas::vector<value_type> v) const 
 {
-    assert(v.size() == 5);
-    ublas::vector<elem_type> f_v(5);
-
-    elem_type S = v(0);
-    elem_type I = v(1);
-    elem_type Q = v(2);
-    elem_type R = v(3);
-    //elem_type D = v(4);
+    ublas::vector<value_type> & f_v(v);
     
-    f_v(0) = (- beta_ * (I / (S + I + R)) * S) + (mu_ * R);
-    f_v(1) = ((beta_ * (S /(S + I + R))) - gamma_ - delta_ - alpha_) * I;
-    f_v(2) = (delta_ * I) - ((gamma_ + alpha_) * Q);
-    f_v(3) = gamma_ * (I + Q) - (mu_ * R);
-    f_v(4) = alpha_ * (I + Q);
-
-    return f_v;
+    std::generate(f_v.begin(), f_v.end(), [n = -1,f_v] () mutable {n++; return -10 * pow(f_v(n)-(value_type(n)/100.),3); });
+    return f_v; 
 }
 
-ublas::matrix<elem_type> calc_jacobian(ublas::vector<elem_type> const& v) const 
+ublas::matrix<value_type> calc_jacobian(ublas::vector<value_type> v) const 
 {
-    assert(v.size() == 5);
-    ublas::matrix<elem_type> jacobian(5,5);
-    jacobian.clear();
-
-    elem_type S = v(0);
-    elem_type I = v(1);
-    //elem_type Q = v(2);
-    elem_type R = v(3);
-    //elem_type D = v(4);
-
-    jacobian(0,0) = ((I * S * beta_) / pow((I + R + S),2))- ((I * beta_)/(I + R + S));
-    jacobian(1,0) = I * ( (-(S * beta_)/pow((I+R+S),2)))+ (beta_ / (I + R + S));
-
-    jacobian(0,1) = ((I * S * beta_) / pow((I + R + S),2)) - ((S * beta_)/(I + R + S));
-    jacobian(1,1) = - ((I * S * beta_) / pow((I + R + S),2)) + ((S * beta_)/(I + R + S)) - alpha_ - delta_ - gamma_;
-    jacobian(2,1) = delta_;
-    jacobian(3,1) = gamma_;
-    jacobian(4,1) = alpha_;
-
-    jacobian(2,2) = - alpha_ - gamma_;
-    jacobian(3,2) = gamma_;
-    jacobian(4,2) = alpha_;
-    
-    jacobian(0,3) = ((I * S * beta_) / pow((I + R + S),2)) + mu_;
-    jacobian(1,3) = - ((I * S * beta_) / pow((I + R + S),2));
-    jacobian(3,3) = - mu_;
-    
+    std::generate(v.begin(), v.end(), [n = -1,v] () mutable {n++; return -30 * pow(v(n)-(value_type(n)/100.),2); });
+    ublas::matrix<value_type> jacobian(v.size(),v.size(),0.);
+    for(long unsigned int i= 0; i < v.size();++i )
+    {
+       jacobian(i,i) = v(i);
+    }
     return jacobian;
 }
-
-private:
-    elem_type beta_;
-    elem_type mu_;
-    elem_type gamma_;
-    elem_type alpha_;
-    elem_type delta_;
 };
 
-int main(int argc, char **argv) 
+ublas::vector<value_type> weird_ODE3(ublas::vector<value_type> v)
 {
-    double     N = std::stoi(argv[1]);
-    double     T = std::stod(argv[2]);
-    ublas::vector<value_type> SIQRD_params(8);
-    ublas::matrix<value_type> SIQRD_values(N,6,double(0.));
+    std::generate(v.begin(), v.end(), [n = -1,v] () mutable {n++; return -10 * pow(v(n)-(value_type(n)/100.),3); }); 
+    return v;
+}
 
-    //beta
-    SIQRD_params(0) = 0.5;
-    //mu
-    SIQRD_params(1) = 0.;
-    //gamma
-    SIQRD_params(2) = 0.2;
-    //alpha
-    SIQRD_params(3) = 0.005;
-    //delta
-    SIQRD_params(4) = 0.;
-    //S_0
-    SIQRD_params(5) = 100;
-    //I_0
-    SIQRD_params(6) = 5;
-    //T
-    SIQRD_params(7) = T;
-
-    SIQRD_values(0,1) = 100;
-    SIQRD_values(0,2) = 5;
-
-    enum Method
-    {
-        EULERF,
-        HEUN,
-        EULERB
-    };
-
-    Method method = EULERB;
-    SIQRD_fun <value_type,value_type>siqrd_fun = SIQRD_fun<value_type,value_type>(SIQRD_params);
-
-
-    std::string file_name;
-    switch(method)
-    {
-        case EULERF:    
-            file_name = "fwe_no_measures.txt";//"euler_f_output.txt";
-            euler_f_solve(SIQRD_values, SIQRD_params, siqrd_fun); 
-            break;
-
-        case HEUN:  
-            file_name = "bwe_quarantine.txt";//"heun_output.txt";
-            heun_solve(SIQRD_values, SIQRD_params, siqrd_fun);
-            break;
-
-        case EULERB: 
-            file_name = "heun_lockdown.txt";//"euler_b_output.txt";
-            euler_b_solve(SIQRD_values, SIQRD_params, siqrd_fun);
-            break;
+template<typename element_type>
+void print_output(ublas::matrix<element_type> const & grid_values, std::string file_name)
+{
+    std::ofstream outputFile(file_name); 
+    for(unsigned int i = 0; i < grid_values.size1(); i += 100)
+    { 
+        outputFile << grid_values(i,0) << " " << grid_values(i,1) << " " << grid_values(i,25) << " " << grid_values(i,50) << std::endl; 
     }
-    
-    print_output(SIQRD_values, file_name);
+}
+
+int main(int argc, char **argv)
+{
+    value_type N = std::stoi(argv[1]);
+    value_type T = std::stod(argv[2]);
+    ublas::matrix<value_type> grid_values(N, 51, value_type(0.));
+
+    auto row0 = ublas::row(grid_values,0);
+    auto row0_values = ublas::subrange(row0,1,51);
+    std::iota(row0_values.begin(),row0_values.end(),1);
+    row0_values = row0_values*value_type(0.01); 
+
+    auto weird_ODE = [](ublas::vector<value_type> v) -> ublas::vector<value_type>
+    {std::generate(v.begin(), v.end(), [n = -1,v] () mutable {n++; return -10 * pow(v(n)-(value_type(n)/100.),3); });return v; };
+
+    int nbOfGridPoints = grid_values.size1();
+    value_type rate = T / nbOfGridPoints;
+
+    std::string file_name = "heun_sim2.txt";
+    heun_solve(grid_values, weird_ODE, rate, nbOfGridPoints);
+    print_output<value_type>(grid_values, file_name);
+
+    std::iota(row0_values.begin(),row0_values.end(),1);
+    row0_values = row0_values*value_type(0.01); 
+    Weird_ODE2 weird_ODE2 = Weird_ODE2();
+    file_name = "fwe_sim2.txt";
+    euler_f_solve(grid_values, weird_ODE3, rate, nbOfGridPoints);
+    print_output<value_type>(grid_values, file_name);
+
+    ublas::matrix<value_type> grid_values3(N, 51, value_type(0.));
+    row0 = ublas::row(grid_values3,0);
+    row0_values = ublas::subrange(row0,1,51);
+    std::iota(row0_values.begin(),row0_values.end(),1);
+    row0_values = row0_values*value_type(0.01); 
+    file_name = "bwe_sim2.txt";
+    //solve_ODE(grid_values3, T, weird_ODE2, EULERB);
+    print_output<value_type>(grid_values3, file_name);
 }
